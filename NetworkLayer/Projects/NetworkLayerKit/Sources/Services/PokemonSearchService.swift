@@ -10,6 +10,7 @@ import Foundation
 
 import Moya
 import Result
+import Combine
 
 protocol PokemonSearchLoadingService: class {
     var provider: MoyaProvider<PokemonSearchEndpoint> { get }
@@ -58,5 +59,51 @@ class PokemonSearchService: PokemonSearchLoadingService {
                 completion(nil, error.localizedDescription)
             }
         }
+    }
+    
+    enum HTTPError: LocalizedError {
+        case statusCode
+    }
+    
+    func testCode(url: URL) -> AnyPublisher<Data, Error> {
+           return URLSession.shared.dataTaskPublisher(for: url)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .eraseToAnyPublisher()
+    }
+    
+    
+}
+
+enum ValidationError: Error {
+    case error(Error)
+    case jsonError(Data)
+}
+
+typealias DataTaskResult = (data: Data, response: URLResponse)
+
+extension Publisher where Output == DataTaskResult {
+    func validateStatusCode(_ isValid: @escaping (Int) -> Bool) -> AnyPublisher<Output, ValidationError> {
+        return validateResponse { (data, response) in
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            return isValid(statusCode)
+        }
+    }
+    
+    func validateResponse(_ isValid: @escaping (DataTaskResult) -> Bool) -> AnyPublisher<Output, ValidationError> {
+        return self
+            .mapError { .error($0) }
+            .flatMap { (result) -> AnyPublisher<DataTaskResult, ValidationError> in
+                let (data, _) = result
+                if isValid(result) {
+                    return Just(result)
+                        .setFailureType(to: ValidationError.self)
+                        .eraseToAnyPublisher()
+                } else {
+                    return Fail(outputType: Output.self, failure: .jsonError(data))
+                        .eraseToAnyPublisher()
+                }}
+            .eraseToAnyPublisher()
     }
 }
