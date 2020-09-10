@@ -63,17 +63,29 @@ class PokemonSearchService: PokemonSearchLoadingService {
     
     enum HTTPError: LocalizedError {
         case statusCode
+        case urlRequestError
     }
     
-    func testCode(url: URL) -> AnyPublisher<Data, Error> {
+    
+    
+    func search(identifier: Int) -> AnyPublisher<Data, Error> {
+        let endPoint = PokemonSearchEndpoint.search(identifier: identifier)
+        let baseURL = endPoint.baseURL
+        let path = endPoint.path
+        guard let requestUrl = URL(string: baseURL.absoluteString + path) else {
+            return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
+        }
+        
+        return load(url: requestUrl)
+    }
+    
+    func load(url: URL) -> AnyPublisher<Data, Error> {
            return URLSession.shared.dataTaskPublisher(for: url)
             .validateStatusCode({ (200..<300).contains($0) })
             .mapError { $0 as Error }
             .map { $0.data }
             .eraseToAnyPublisher()
     }
-    
-    
 }
 
 enum ValidationError: Error {
