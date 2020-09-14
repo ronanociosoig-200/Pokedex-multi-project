@@ -7,6 +7,7 @@
 //
 
 import PokedexCore
+import PokedexCommon
 
 protocol CatchView: class {
     func update()

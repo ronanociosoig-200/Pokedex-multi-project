@@ -8,6 +8,7 @@
 
 import Foundation
 import PokedexCore
+import PokedexCommon
 
 protocol PokemonDetailView: class {
     

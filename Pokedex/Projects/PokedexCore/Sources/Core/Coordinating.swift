@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PokedexCommon
 
 public protocol Updatable {
     func update()

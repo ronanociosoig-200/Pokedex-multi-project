@@ -12,6 +12,7 @@ import PokedexCore
 import ProfileKit
 import AuthorizeKit
 import SwiftUI
+import PokedexCommon
 
 class Coordinator: Coordinating {
     let window: UIWindow

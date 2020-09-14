@@ -9,6 +9,8 @@
 import Foundation
 import os.log
 import NetworkLayerKit
+import Combine
+import PokedexCommon
 
 struct Log {
     static var general = OSLog(subsystem: "com.sonomos.InTune", category: "general")
@@ -44,6 +46,15 @@ public class DataProvider: DataProviding {
     
     public func search(identifier: Int) {
         appData.pokemon = nil
+        
+        let anyPublisher = networkService.search(identifier: identifier) // as? AnyPublisher<Data,Error>
+        
+        anyPublisher.sink(receiveCompletion: { (error) in
+            print(error)
+        }) { (data) in
+            // decode
+            
+        }
         
         networkService.search(identifier: identifier) { (data, errorMessage) in
             let queue = DispatchQueue.main

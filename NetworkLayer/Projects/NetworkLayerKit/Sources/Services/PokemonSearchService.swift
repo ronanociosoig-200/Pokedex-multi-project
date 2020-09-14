@@ -11,6 +11,7 @@ import Foundation
 import Moya
 import Result
 import Combine
+import PokedexCommon
 
 protocol PokemonSearchLoadingService: class {
     var provider: MoyaProvider<PokemonSearchEndpoint> { get }
@@ -66,17 +67,49 @@ class PokemonSearchService: PokemonSearchLoadingService {
         case urlRequestError
     }
     
+//    func search(identifier: Int) -> AnyPublisher<Data, Error> {
+//        // TODO: Improve this mapping of the URL to a request
+//        let target = PokemonSearchEndpoint.search(identifier: identifier)
+//        let provider = MoyaProvider<PokemonSearchEndpoint>()
+//        let endpoint = provider.endpoint(target)
+//
+//        do {
+//            let urlRequest = try endpoint.urlRequest()
+//            return load(urlRequest: urlRequest)
+//        } catch {
+//            return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
+//        }
+//    }
     
-    
-    func search(identifier: Int) -> AnyPublisher<Data, Error> {
-        let endPoint = PokemonSearchEndpoint.search(identifier: identifier)
-        let baseURL = endPoint.baseURL
-        let path = endPoint.path
-        guard let requestUrl = URL(string: baseURL.absoluteString + path) else {
+    func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
+        // TODO: Improve this mapping of the URL to a request
+        let target = PokemonSearchEndpoint.search(identifier: identifier)
+        let provider = MoyaProvider<PokemonSearchEndpoint>()
+        let endpoint = provider.endpoint(target)
+        
+        do {
+            let urlRequest = try endpoint.urlRequest()
+            return load(urlRequest: urlRequest)
+        } catch {
             return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
         }
-        
-        return load(url: requestUrl)
+    }
+    
+    func load(urlRequest: URLRequest) -> AnyPublisher<Data, Error> {
+        return URLSession.shared.dataTaskPublisher(for: urlRequest)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .eraseToAnyPublisher()
+    }
+    
+    func load(urlRequest: URLRequest) -> AnyPublisher<Pokemon, Error> {
+        return URLSession.shared.dataTaskPublisher(for: urlRequest)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .decode(type: Pokemon.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
     }
     
     func load(url: URL) -> AnyPublisher<Data, Error> {
