@@ -29,8 +29,8 @@ class Coordinator: Coordinating {
     func start() {
         actions.dataProvider = dataProvider
         
-        showLoginScene()
-        // showHomeScene()
+        // showLoginScene()
+        showHomeScene()
     }
     
     func showLoginScene() {
