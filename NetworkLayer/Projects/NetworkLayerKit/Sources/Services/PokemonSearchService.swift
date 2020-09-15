@@ -28,6 +28,7 @@ class PokemonSearchService: PokemonSearchLoadingService {
                         task: target.task,
                         httpHeaderFields: target.headers)
     }
+    // swiftlint:enable force_unwrapping
     
     private var cancellable: AnyCancellable?
     
@@ -69,20 +70,6 @@ class PokemonSearchService: PokemonSearchLoadingService {
         case urlRequestError
     }
     
-//    func search(identifier: Int) -> AnyPublisher<Data, Error> {
-//        // TODO: Improve this mapping of the URL to a request
-//        let target = PokemonSearchEndpoint.search(identifier: identifier)
-//        let provider = MoyaProvider<PokemonSearchEndpoint>()
-//        let endpoint = provider.endpoint(target)
-//
-//        do {
-//            let urlRequest = try endpoint.urlRequest()
-//            return load(urlRequest: urlRequest)
-//        } catch {
-//            return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
-//        }
-//    }
-    
     func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
         // TODO: Improve this mapping of the URL to a request
         let target = PokemonSearchEndpoint.search(identifier: identifier)
@@ -97,50 +84,17 @@ class PokemonSearchService: PokemonSearchLoadingService {
         }
     }
     
-    func load(urlRequest: URLRequest) -> AnyPublisher<Data, Error> {
-        return URLSession.shared.dataTaskPublisher(for: urlRequest)
-            .validateStatusCode({ (200..<300).contains($0) })
-            .mapError { $0 as Error }
-            .map { $0.data }
-            .eraseToAnyPublisher()
-    }
-    
     func load(urlRequest: URLRequest) -> AnyPublisher<Pokemon, Error> {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
         return URLSession.shared.dataTaskPublisher(for: urlRequest)
-            //.validateStatusCode({ (200..<300).contains($0) })
+            .validateStatusCode({ (200..<300).contains($0) })
             .mapError { $0 as Error }
             .map { $0.data }
             .decode(type: Pokemon.self, decoder: decoder)
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
-    }
-    
-    func load(url: URL) -> AnyPublisher<Data, Error> {
-           return URLSession.shared.dataTaskPublisher(for: url)
-            .validateStatusCode({ (200..<300).contains($0) })
-            .mapError { $0 as Error }
-            .map { $0.data }
-            .eraseToAnyPublisher()
-    }
-    
-    func loadSamplePokemon() {
-        let url1 = URL(string: "https://pokeapi.co/api/v2/pokemon/182/")!
-        
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        
-        cancellable = URLSession.shared.dataTaskPublisher(for: url1)
-            .validateStatusCode({ (200..<300).contains($0) })
-            .map { $0.data }
-            .decode(type: Pokemon.self, decoder: decoder)
-            .sink(receiveCompletion: { (error) in
-                print("Error: \(error)")
-            }) { (pokemon) in
-                print("Pokemon found with name: \(pokemon.name)")
-            }
     }
 }
 

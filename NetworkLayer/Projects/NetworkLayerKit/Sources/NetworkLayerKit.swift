@@ -5,7 +5,6 @@ import PokedexCommon
 public protocol SearchProviding {
     // func search(identifier: Int, completion: @escaping (_ data: Data?, _ error: String?) -> Void)
     func search(identifier: Int) -> AnyPublisher<Pokemon, Error>
-    func loadDemo()
 }
 
 public final class NetworkLayerKit: SearchProviding {
@@ -22,15 +21,7 @@ public final class NetworkLayerKit: SearchProviding {
         }
     }
     
-//    public func search(identifier: Int) -> AnyPublisher<Data, Error> {
-//        return searchService.search(identifier: identifier)
-//    }
-    
     public func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
         return searchService.search(identifier: identifier)
-    }
-    
-    public func loadDemo() {
-        searchService.loadSamplePokemon()
     }
 }
