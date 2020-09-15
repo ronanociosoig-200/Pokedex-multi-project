@@ -133,6 +133,7 @@ class PokemonSearchService: PokemonSearchLoadingService {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
         cancellable = URLSession.shared.dataTaskPublisher(for: url1)
+            .validateStatusCode({ (200..<300).contains($0) })
             .map { $0.data }
             .decode(type: Pokemon.self, decoder: decoder)
             .sink(receiveCompletion: { (error) in

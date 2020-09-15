@@ -48,6 +48,8 @@ public class DataProvider: DataProviding {
         appData.pokemon = nil
         
         networkService.loadDemo()
+        let queue = DispatchQueue.main
+        self.notifier?.dataReceived(errorMessage: nil, on: queue)
         
 //        let anyPublisher = networkService.search(identifier: identifier) // as? AnyPublisher<Data,Error>
 //
