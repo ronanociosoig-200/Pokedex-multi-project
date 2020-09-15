@@ -36,6 +36,7 @@ public class DataProvider: DataProviding {
     private let networkService: SearchProviding
     
     private var anyPublisher: AnyPublisher<Pokemon,Error>?
+    private var cancellable: AnyCancellable?
     
     public required init(service: SearchProviding) {
         self.networkService = service
@@ -53,7 +54,7 @@ public class DataProvider: DataProviding {
         anyPublisher = networkService.search(identifier: identifier)
         
         if let publisher = anyPublisher {
-            let _ = publisher.receive(on: queue)
+            cancellable = publisher.receive(on: queue)
                 .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
