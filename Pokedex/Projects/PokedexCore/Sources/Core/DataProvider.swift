@@ -35,6 +35,9 @@ public class DataProvider: DataProviding {
     public var notifier: Notifier?
     private let networkService: SearchProviding
     
+    private var anyPublisher: AnyPublisher<Pokemon,Error>?
+    private var cancellable: AnyCancellable?
+    
     public required init(service: SearchProviding) {
         self.networkService = service
     }
@@ -47,18 +50,28 @@ public class DataProvider: DataProviding {
     public func search(identifier: Int) {
         appData.pokemon = nil
         
-        networkService.loadDemo()
+//        networkService.loadDemo()
         let queue = DispatchQueue.main
-        self.notifier?.dataReceived(errorMessage: nil, on: queue)
+
+        anyPublisher = networkService.search(identifier: identifier)
         
-//        let anyPublisher = networkService.search(identifier: identifier) // as? AnyPublisher<Data,Error>
-//
-//        anyPublisher.sink(receiveCompletion: { (error) in
-//            print(error)
-//        }) { (pokemon) in
-//            print("Pokemon name: \(pokemon.name)")
-//
-//        }
+        if let publisher = anyPublisher {
+            cancellable = publisher.sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    let errorMessage = error.localizedDescription
+                    self.notifier?.dataReceived(errorMessage: errorMessage, on: queue)
+                    os_log("Error message: %s", log: Log.network, type: .error, errorMessage)
+                    return
+                }
+            }, receiveValue: { pokemon in
+                self.appData.pokemon = pokemon
+                self.notifier?.dataReceived(errorMessage: nil, on: queue)
+                os_log("Success: %s", log: Log.network, type: .default, "Loaded")
+            })
+        }
         
 //        networkService.search(identifier: identifier) { (data, errorMessage) in
 //            let queue = DispatchQueue.main
