@@ -29,6 +29,8 @@ class PokemonSearchService: PokemonSearchLoadingService {
                         httpHeaderFields: target.headers)
     }
     
+    private var cancellable: AnyCancellable?
+    
     var provider: MoyaProvider<PokemonSearchEndpoint> {
         
         if Configuration.authenticationErrorTesting {
@@ -104,11 +106,15 @@ class PokemonSearchService: PokemonSearchLoadingService {
     }
     
     func load(urlRequest: URLRequest) -> AnyPublisher<Pokemon, Error> {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
         return URLSession.shared.dataTaskPublisher(for: urlRequest)
-            .validateStatusCode({ (200..<300).contains($0) })
+            //.validateStatusCode({ (200..<300).contains($0) })
             .mapError { $0 as Error }
             .map { $0.data }
-            .decode(type: Pokemon.self, decoder: JSONDecoder())
+            .decode(type: Pokemon.self, decoder: decoder)
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
     
@@ -118,6 +124,22 @@ class PokemonSearchService: PokemonSearchLoadingService {
             .mapError { $0 as Error }
             .map { $0.data }
             .eraseToAnyPublisher()
+    }
+    
+    func loadSamplePokemon() {
+        let url1 = URL(string: "https://pokeapi.co/api/v2/pokemon/182/")!
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        cancellable = URLSession.shared.dataTaskPublisher(for: url1)
+            .map { $0.data }
+            .decode(type: Pokemon.self, decoder: decoder)
+            .sink(receiveCompletion: { (error) in
+                print("Error: \(error)")
+            }) { (pokemon) in
+                print("Pokemon found with name: \(pokemon.name)")
+            }
     }
 }
 
