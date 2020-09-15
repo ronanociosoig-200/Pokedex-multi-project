@@ -8,6 +8,7 @@
 
 import UIKit
 import PokedexCore
+import PokedexCommon
 
 class PokemonDetailWireframe {
     

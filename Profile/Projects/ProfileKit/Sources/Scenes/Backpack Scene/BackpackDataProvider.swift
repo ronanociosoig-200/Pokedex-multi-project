@@ -7,6 +7,7 @@
 //
 
 import PokedexCore
+import PokedexCommon
 
 public protocol BackpackDataProvider {
     func pokemons() -> [LocalPokemon]

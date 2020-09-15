@@ -10,6 +10,8 @@ import Foundation
 
 import Moya
 import Result
+import Combine
+import PokedexCommon
 
 protocol PokemonSearchLoadingService: class {
     var provider: MoyaProvider<PokemonSearchEndpoint> { get }
@@ -26,6 +28,8 @@ class PokemonSearchService: PokemonSearchLoadingService {
                         task: target.task,
                         httpHeaderFields: target.headers)
     }
+    
+    private var cancellable: AnyCancellable?
     
     var provider: MoyaProvider<PokemonSearchEndpoint> {
         
@@ -58,5 +62,116 @@ class PokemonSearchService: PokemonSearchLoadingService {
                 completion(nil, error.localizedDescription)
             }
         }
+    }
+    
+    enum HTTPError: LocalizedError {
+        case statusCode
+        case urlRequestError
+    }
+    
+//    func search(identifier: Int) -> AnyPublisher<Data, Error> {
+//        // TODO: Improve this mapping of the URL to a request
+//        let target = PokemonSearchEndpoint.search(identifier: identifier)
+//        let provider = MoyaProvider<PokemonSearchEndpoint>()
+//        let endpoint = provider.endpoint(target)
+//
+//        do {
+//            let urlRequest = try endpoint.urlRequest()
+//            return load(urlRequest: urlRequest)
+//        } catch {
+//            return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
+//        }
+//    }
+    
+    func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
+        // TODO: Improve this mapping of the URL to a request
+        let target = PokemonSearchEndpoint.search(identifier: identifier)
+        let provider = MoyaProvider<PokemonSearchEndpoint>()
+        let endpoint = provider.endpoint(target)
+        
+        do {
+            let urlRequest = try endpoint.urlRequest()
+            return load(urlRequest: urlRequest)
+        } catch {
+            return Fail(error: HTTPError.urlRequestError).eraseToAnyPublisher()
+        }
+    }
+    
+    func load(urlRequest: URLRequest) -> AnyPublisher<Data, Error> {
+        return URLSession.shared.dataTaskPublisher(for: urlRequest)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .eraseToAnyPublisher()
+    }
+    
+    func load(urlRequest: URLRequest) -> AnyPublisher<Pokemon, Error> {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        return URLSession.shared.dataTaskPublisher(for: urlRequest)
+            //.validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .decode(type: Pokemon.self, decoder: decoder)
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    func load(url: URL) -> AnyPublisher<Data, Error> {
+           return URLSession.shared.dataTaskPublisher(for: url)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .eraseToAnyPublisher()
+    }
+    
+    func loadSamplePokemon() {
+        let url1 = URL(string: "https://pokeapi.co/api/v2/pokemon/182/")!
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        cancellable = URLSession.shared.dataTaskPublisher(for: url1)
+            .validateStatusCode({ (200..<300).contains($0) })
+            .map { $0.data }
+            .decode(type: Pokemon.self, decoder: decoder)
+            .sink(receiveCompletion: { (error) in
+                print("Error: \(error)")
+            }) { (pokemon) in
+                print("Pokemon found with name: \(pokemon.name)")
+            }
+    }
+}
+
+enum ValidationError: Error {
+    case error(Error)
+    case jsonError(Data)
+}
+
+typealias DataTaskResult = (data: Data, response: URLResponse)
+
+extension Publisher where Output == DataTaskResult {
+    func validateStatusCode(_ isValid: @escaping (Int) -> Bool) -> AnyPublisher<Output, ValidationError> {
+        return validateResponse { (data, response) in
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            return isValid(statusCode)
+        }
+    }
+    
+    func validateResponse(_ isValid: @escaping (DataTaskResult) -> Bool) -> AnyPublisher<Output, ValidationError> {
+        return self
+            .mapError { .error($0) }
+            .flatMap { (result) -> AnyPublisher<DataTaskResult, ValidationError> in
+                let (data, _) = result
+                if isValid(result) {
+                    return Just(result)
+                        .setFailureType(to: ValidationError.self)
+                        .eraseToAnyPublisher()
+                } else {
+                    return Fail(outputType: Output.self, failure: .jsonError(data))
+                        .eraseToAnyPublisher()
+                }}
+            .eraseToAnyPublisher()
     }
 }

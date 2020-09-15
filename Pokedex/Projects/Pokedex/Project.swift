@@ -21,8 +21,8 @@ let project = Project(name: "Pokedex",
                                 .project(target: "Haneke", path: .relativeToManifest("../../../Haneke/Projects/Haneke")),
                                 .project(target: "ProfileKit", path: .relativeToManifest("../../../Profile/Projects/ProfileKit")),
                                 .project(target: "PokedexCore", path: .relativeToManifest("../../../Pokedex/Projects/PokedexCore")),
+                                .project(target: "PokedexCommon", path: .relativeToManifest("../../../Pokedex/Projects/PokedexCommon")),
                                 .project(target: "AuthorizeKit", path: .relativeToManifest("../../../Authorize/Projects/AuthorizeKit"))
-                                
                         ]),
                         Target(name: "PokedexTests",
                                platform: .iOS,

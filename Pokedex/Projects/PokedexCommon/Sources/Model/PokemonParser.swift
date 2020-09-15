@@ -9,7 +9,7 @@
 import Foundation
 
 public struct PokemonParser {
-    static func parse(pokemon: Pokemon) -> LocalPokemon {
+    public static func parse(pokemon: Pokemon) -> LocalPokemon {
         let types = pokemon.types
         
         let typeNames = types.map {

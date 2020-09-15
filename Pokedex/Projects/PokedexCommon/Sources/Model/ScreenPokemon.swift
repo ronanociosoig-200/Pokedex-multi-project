@@ -13,4 +13,11 @@ public struct ScreenPokemon {
     public let weight: Int
     public let height: Int
     public var iconPath: String?
+    
+    public init(name: String, weight: Int, height: Int, iconPath: String?) {
+        self.name = name
+        self.weight = weight
+        self.height = height
+        self.iconPath = iconPath
+    }
 }

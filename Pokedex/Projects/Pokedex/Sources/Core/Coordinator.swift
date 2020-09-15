@@ -12,6 +12,7 @@ import PokedexCore
 import ProfileKit
 import AuthorizeKit
 import SwiftUI
+import PokedexCommon
 
 class Coordinator: Coordinating {
     let window: UIWindow
@@ -29,8 +30,8 @@ class Coordinator: Coordinating {
     func start() {
         actions.dataProvider = dataProvider
         
-        showLoginScene()
-        // showHomeScene()
+        // showLoginScene()
+        showHomeScene()
     }
     
     func showLoginScene() {
