@@ -4,7 +4,7 @@ let project = Project(name: "NetworkLayerKit",
                       packages: [
                         .package(url: "https://github.com/Moya/Moya.git", .upToNextMajor(from: "14.0.0")),
                         .package(url: "https://github.com/antitypical/Result.git", from: "5.0.0"),
-                        .package(url: "https://github.com/AliSoftware/OHHTTPStubs.git", from: "9.0.0")
+                        .package(url: "https://github.com/AliSoftware/OHHTTPStubs", from: "9.0.0")
     ],
                       targets: [
                         Target(name: "NetworkLayerKit",
@@ -30,6 +30,6 @@ let project = Project(name: "NetworkLayerKit",
                                sources: "Tests/**",
                                dependencies: [
                                 .target(name: "NetworkLayerKit"),
-                                .package(product: "OHHTTPStubs")
+                                .package(product: "OHHTTPStubsSwift")
                         ])
 ])

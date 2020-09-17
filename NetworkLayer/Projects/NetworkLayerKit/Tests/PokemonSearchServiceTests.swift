@@ -6,9 +6,10 @@
 //
 
 import XCTest
+import OHHTTPStubs
+import OHHTTPStubsSwift
 import Combine
 import PokedexCommon
-import OHHTTPStubs
 
 @testable import NetworkLayerKit
 
