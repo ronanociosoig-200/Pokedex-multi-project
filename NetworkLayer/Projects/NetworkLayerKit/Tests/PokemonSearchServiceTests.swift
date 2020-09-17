@@ -43,7 +43,7 @@ class PokemonSearchServiceTests: XCTestCase {
         let url = urlRequest.url!
         let pattern = url.path
         
-        let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 404, headers: makeMockHeaders())
+        let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 200, headers: makeMockHeaders())
     
         stub(condition: isMethodGET() && pathContains(pattern),
              response: { request in
