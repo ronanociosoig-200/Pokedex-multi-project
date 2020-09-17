@@ -75,6 +75,32 @@ class PokemonSearchServiceTests: XCTestCase {
         waitForExpectations(timeout: expectationTimeOut)
     }
     
+    func testSearchWithInvalidIdentifierFails() throws {
+        let expectation = self.expectation(description: "Completes with a 404")
+        anyPublisher = sut.search(identifier: invalidIdentifier)
+        
+        if let publisher = anyPublisher {
+            cancellable = publisher.sink(receiveCompletion: { completion in
+                expectation.fulfill()
+                switch completion {
+                case .finished:
+                    print("Finished")
+                case .failure(let error):
+                    print(error)
+                    XCTAssertTrue(true)
+                    return
+                }
+                
+            }, receiveValue: { (_) in
+                
+            })
+        }
+        
+        waitForExpectations(timeout: expectationTimeOut)
+    }
+    
+    
+    
     func loadMockPokemon(from fileName: String) -> Pokemon {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
