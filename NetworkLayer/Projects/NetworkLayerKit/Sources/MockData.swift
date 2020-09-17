@@ -15,9 +15,7 @@ class MockData {
     static let fileReadError = "File not readable"
     static let fileNotFoundError = "File not found"
     
-    static func load(name: String) throws -> Data? {
-        let bundle = Bundle.init(for: MockData.self)
-        
+    static func load(name: String, bundle: Bundle = Bundle.init(for: MockData.self)) throws -> Data? {
         if let path = bundle.path(forResource: name, ofType: fileType) {
             let fileUrl = URL.init(fileURLWithPath: path)
             do {

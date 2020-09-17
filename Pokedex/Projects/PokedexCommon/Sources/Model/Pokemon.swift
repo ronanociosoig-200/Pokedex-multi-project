@@ -8,7 +8,11 @@
 
 import Foundation
 
-public struct Pokemon: Codable {
+public struct Pokemon: Codable, Equatable {
+    public static func == (lhs: Pokemon, rhs: Pokemon) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     public let baseExperience: Int
     public let height: Int
     // swiftlint:disable identifier_name
