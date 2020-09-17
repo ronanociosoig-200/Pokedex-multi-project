@@ -42,10 +42,12 @@ class PokemonSearchServiceTests: XCTestCase {
         let urlRequest = try! sut.getEndpoint(with: validIdentifier).urlRequest()
         let url = urlRequest.url!
         let pattern = url.absoluteString
+        
+        let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 404, headers: makeMockHeaders())
     
         stub(condition: isMethodGET() && pathContains(pattern),
              response: { request in
-                return fixture(filePath: stubPath, status: 404, headers: self.makeMockHeaders())
+                return stubResponse
         })
         
         let expectation = self.expectation(description: "Completes succesfully")
