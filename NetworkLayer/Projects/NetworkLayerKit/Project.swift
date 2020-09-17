@@ -28,6 +28,7 @@ let project = Project(name: "NetworkLayerKit",
                                bundleId: "com.wefox.NetworkLayerTests",
                                infoPlist: "Tests.plist",
                                sources: "Tests/**",
+                               resources: "Tests/**",
                                dependencies: [
                                 .target(name: "NetworkLayerKit"),
                                 .package(product: "OHHTTPStubsSwift")
