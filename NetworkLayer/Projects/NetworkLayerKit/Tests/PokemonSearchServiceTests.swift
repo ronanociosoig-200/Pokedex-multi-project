@@ -33,10 +33,9 @@ class PokemonSearchServiceTests: XCTestCase {
     }
 
     func testSearchWithValidIdentifierPasses() throws {
-        let responseJSON = "Pokemon182.json"
-        
-        guard let stubPath = OHPathForFile(responseJSON, type(of: self)) else {
-            XCTFail("No mock data from file \(responseJSON)")
+        let fileWithExtension = validResponseJSON + ".json"
+        guard let stubPath = OHPathForFile(fileWithExtension, type(of: self)) else {
+            XCTFail("No mock data from file \(fileWithExtension)")
             return
         }
         
