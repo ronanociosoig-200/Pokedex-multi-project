@@ -70,11 +70,15 @@ class PokemonSearchService: PokemonSearchLoadingService {
         case urlRequestError
     }
     
-    func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
-        // TODO: Improve this mapping of the URL to a request
+    func getEndpoint(with identifier: Int) -> Endpoint {
         let target = PokemonSearchEndpoint.search(identifier: identifier)
         let provider = MoyaProvider<PokemonSearchEndpoint>()
-        let endpoint = provider.endpoint(target)
+        return provider.endpoint(target)
+    }
+    
+    func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
+        // TODO: Improve this mapping of the URL to a request
+        let endpoint = getEndpoint(with: identifier)
         
         do {
             let urlRequest = try endpoint.urlRequest()
