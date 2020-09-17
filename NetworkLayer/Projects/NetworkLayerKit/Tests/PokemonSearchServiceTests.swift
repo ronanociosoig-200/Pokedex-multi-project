@@ -41,7 +41,7 @@ class PokemonSearchServiceTests: XCTestCase {
         
         let urlRequest = try! sut.getEndpoint(with: validIdentifier).urlRequest()
         let url = urlRequest.url!
-        let pattern = url.absoluteString
+        let pattern = url.path
         
         let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 404, headers: makeMockHeaders())
     
@@ -57,19 +57,18 @@ class PokemonSearchServiceTests: XCTestCase {
         
         if let publisher = anyPublisher {
             cancellable = publisher.sink(receiveCompletion: { completion in
+                expectation.fulfill()
                 switch completion {
                 case .finished:
                     print("Finished")
-                case .failure:
+                case .failure(let error):
+                    print(error)
                     XCTFail()
+                    return
                 }
                 
             }, receiveValue: { (pokemon) in
-                if pokemon == expectedPokemon {
-                    expectation.fulfill()
-                } else {
-                    XCTFail()
-                }
+                XCTAssert(pokemon == expectedPokemon, "Pokemen objects should be equal")
             })
         }
         
