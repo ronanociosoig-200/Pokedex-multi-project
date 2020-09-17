@@ -99,7 +99,46 @@ class PokemonSearchServiceTests: XCTestCase {
         waitForExpectations(timeout: expectationTimeOut)
     }
     
-    
+    func testSearchValidatesHTTPStatusCodeFails() {
+        let fileWithExtension = validResponseJSON + ".json"
+        guard let stubPath = OHPathForFile(fileWithExtension, type(of: self)) else {
+            XCTFail("No mock data from file \(fileWithExtension)")
+            return
+        }
+        
+        let urlRequest = try! sut.getEndpoint(with: validIdentifier).urlRequest()
+        let url = urlRequest.url!
+        let pattern = url.path
+        
+        let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 400, headers: makeMockHeaders())
+        
+        stub(condition: isMethodGET() && pathContains(pattern),
+             response: { request in
+                return stubResponse
+        })
+        
+        let expectation = self.expectation(description: "Completes succesfully")
+        anyPublisher = sut.search(identifier: validIdentifier)
+        
+        if let publisher = anyPublisher {
+            cancellable = publisher.sink(receiveCompletion: { completion in
+                expectation.fulfill()
+                switch completion {
+                case .finished:
+                    print("Finished")
+                case .failure(let error):
+                    print(error)
+                    XCTAssertTrue(true)
+                    return
+                }
+                
+            }, receiveValue: { (pokemon) in
+                
+            })
+        }
+        
+        waitForExpectations(timeout: expectationTimeOut)
+    }
     
     func loadMockPokemon(from fileName: String) -> Pokemon {
         let decoder = JSONDecoder()
