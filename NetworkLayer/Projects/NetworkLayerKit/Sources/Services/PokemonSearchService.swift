@@ -16,6 +16,7 @@ import PokedexCommon
 protocol PokemonSearchLoadingService: class {
     var provider: MoyaProvider<PokemonSearchEndpoint> { get }
     func search(identifier: Int) -> AnyPublisher<Pokemon, Error>
+    func load<T: Decodable>(urlRequest: URLRequest) -> AnyPublisher<T, Error>
 }
 
 class PokemonSearchService: PokemonSearchLoadingService {
@@ -87,7 +88,7 @@ class PokemonSearchService: PokemonSearchLoadingService {
         }
     }
     
-    func load(urlRequest: URLRequest) -> AnyPublisher<Pokemon, Error> {
+    func load<T: Decodable>(urlRequest: URLRequest) -> AnyPublisher<T, Error> {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
@@ -95,7 +96,7 @@ class PokemonSearchService: PokemonSearchLoadingService {
             .validateStatusCode({ (200..<300).contains($0) })
             .mapError { $0 as Error }
             .map { $0.data }
-            .decode(type: Pokemon.self, decoder: decoder)
+            .decode(type: T.self, decoder: decoder)
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }

@@ -24,6 +24,12 @@ class MockPokemonSearchService: PokemonSearchLoadingService {
         return mockPokemon()
     }
     
+    func load<T>(urlRequest: URLRequest) -> AnyPublisher<T, Error> where T : Decodable {
+        let data = Data("{}".utf8)
+        let value = try! JSONDecoder().decode(T.self, from: data)
+        let subject = CurrentValueSubject<T, Error>(value)
+        return subject.eraseToAnyPublisher()
+    }
     
     private func mockPokemon() -> AnyPublisher<Pokemon, Error> {
         let data = try! MockData.loadResponse()
