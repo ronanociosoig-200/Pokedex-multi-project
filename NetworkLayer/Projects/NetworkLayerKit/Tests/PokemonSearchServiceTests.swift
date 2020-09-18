@@ -23,6 +23,8 @@ class PokemonSearchServiceTests: XCTestCase {
     let validResponseJSON = "Pokemon182"
     var anyPublisher: AnyPublisher<Pokemon, Error>?
     var cancellable: AnyCancellable?
+    
+    let serverError = "Server499Error"
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -138,6 +140,47 @@ class PokemonSearchServiceTests: XCTestCase {
         }
         
         waitForExpectations(timeout: expectationTimeOut)
+    }
+    
+    func testRequestErrorReurnsExpectedError() {
+        let fileWithExtension = serverError + ".json"
+        guard let stubPath = OHPathForFile(fileWithExtension, type(of: self)) else {
+            XCTFail("No mock data from file \(fileWithExtension)")
+            return
+        }
+        let stubResponse = HTTPStubsResponse(fileAtPath: stubPath, statusCode: 499, headers: makeMockHeaders())
+        
+        let urlRequest = try! sut.getEndpoint(with: validIdentifier).urlRequest()
+        let url = urlRequest.url!
+        let pattern = url.path
+        
+        stub(condition: isMethodGET() && pathContains(pattern),
+             response: { request in
+                return stubResponse
+        })
+        
+        let expectation = self.expectation(description: "Should fail with error object")
+        anyPublisher = sut.search(identifier: validIdentifier)
+        
+        if let publisher = anyPublisher {
+            cancellable = publisher.sink(receiveCompletion: { completion in
+                expectation.fulfill()
+                switch completion {
+                case .finished:
+                    print("Finished")
+                case .failure(let error):
+                    print(error)
+                    XCTAssertTrue(true)
+                    return
+                }
+                
+            }, receiveValue: { (pokemon) in
+                
+            })
+        }
+        
+        waitForExpectations(timeout: expectationTimeOut)
+        
     }
     
     func loadMockPokemon(from fileName: String) -> Pokemon {

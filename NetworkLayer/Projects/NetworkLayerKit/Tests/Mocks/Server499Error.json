@@ -1,0 +1,11 @@
+{
+    "error_code": "1007",
+    "error_description": "Validation Error, The data passed in the request was invalid. Please check and resubmit",
+    "localized_message": null,
+    "error_type": null,
+    "validation_errors": [{
+        "propertyName": "password",
+        "propertyValue": "",
+        "message": "length must be between 8 and 30"
+    }]
+}
