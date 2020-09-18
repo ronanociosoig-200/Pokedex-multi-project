@@ -15,8 +15,7 @@ import PokedexCommon
 
 protocol PokemonSearchLoadingService: class {
     var provider: MoyaProvider<PokemonSearchEndpoint> { get }
-    
-    func search(identifier: Int, completion: @escaping (_ data: Data?, _ error: String?) -> Void)
+    func search(identifier: Int) -> AnyPublisher<Pokemon, Error>
 }
 
 class PokemonSearchService: PokemonSearchLoadingService {

@@ -10,6 +10,8 @@
 
 import Foundation
 import Moya
+import Combine
+import PokedexCommon
 
 @testable import NetworkLayerKit
 
@@ -17,9 +19,18 @@ class MockPokemonSearchService: PokemonSearchLoadingService {
     var provider: MoyaProvider<PokemonSearchEndpoint> {
         return MoyaProvider<PokemonSearchEndpoint>(stubClosure: MoyaProvider.immediatelyStub)
     }
+
+    func search(identifier: Int) -> AnyPublisher<Pokemon, Error> {
+        return mockPokemon()
+    }
     
-    func search(identifier: Int, completion: @escaping (Data?, String?) -> Void) {
+    
+    private func mockPokemon() -> AnyPublisher<Pokemon, Error> {
         let data = try! MockData.loadResponse()
-        completion(data, nil)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let pokemon = try! decoder.decode(Pokemon.self, from: data!)
+        let subject = CurrentValueSubject<Pokemon, Error>(pokemon)
+        return subject.eraseToAnyPublisher()
     }
 }
