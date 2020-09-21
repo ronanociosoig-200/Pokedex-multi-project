@@ -11,7 +11,6 @@ let project = Project(name: "PokedexCore",
                                bundleId: "com.wefox.PokedexCore",
                                infoPlist: "Info.plist",
                                sources: ["Sources/**"],
-                               resources: ["Resources/**"],
                                dependencies: [
                                 .project(target: "NetworkLayerKit", path: .relativeToManifest("../../../NetworkLayer/Projects/NetworkLayerKit"))
                         ])

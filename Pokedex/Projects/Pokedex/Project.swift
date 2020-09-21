@@ -14,7 +14,6 @@ let project = Project(name: "Pokedex",
                                infoPlist: "Info.plist",
                                sources: ["Sources/**"],
                                resources: ["Resources/**","Sources/Scenes/**/*.storyboard",
-                                           "Sources/Scenes/**/*.xib",
                                            "Sources/Views/**/*.xib"],
                                dependencies: [
                                 .package(product: "JGProgressHUD"),
