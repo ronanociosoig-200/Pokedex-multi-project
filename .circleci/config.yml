@@ -22,7 +22,7 @@ jobs:
       - checkout
       - run: echo "running a sample job"
       #- run: pod install # Install CocoaPods dependencies
-      - run: which swiftlint
+      # - run: which swiftlint
       - run: swiftlint
      # Run tests using Fastlane
 
