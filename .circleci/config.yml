@@ -22,7 +22,7 @@ jobs:
       - checkout
       - run: echo "Sample run"
       - run: gem install cocoapods
-      - run: pod install 
+      - run: xcodebuild -list  
       # - run: pod install # Install CocoaPods dependencies
       # - run: fastlane scan # Run tests using Fastlane
 
